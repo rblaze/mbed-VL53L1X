@@ -7,17 +7,7 @@
 #define _VL53L1_PLATFORM_H_
 
 #include "vl53l1_types.h"
-
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
-typedef struct {
-	uint32_t dummy;
-} VL53L1_Dev_t;
-
-typedef VL53L1_Dev_t *VL53L1_DEV;
+#include <I2C.h>
 
 /** @brief VL53L1_WriteMulti() definition.\n
  * To be implemented by the developer
@@ -84,8 +74,12 @@ int8_t VL53L1_WaitMs(
 		uint16_t dev,
 		int32_t       wait_ms);
 
-#ifdef __cplusplus
-}
-#endif
+constexpr int8_t VL53L1_I2C_SUCCESS = 0;
+constexpr int8_t VL53L1_I2C_ERROR = -1;
+constexpr int8_t VL53L1_UNKNOWN_DEVICE = -2;
+
+uint16_t VL53L1_RegisterDevice(mbed::I2C& i2c, int address);
+void VL53L1_ChangeDeviceAddress(uint16_t dev, int new_address);
+void VL53L1_UnregisterDevice(uint16_t dev);
 
 #endif
