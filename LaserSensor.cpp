@@ -40,6 +40,7 @@ bool LaserSensor::measureOnce() {
   success = true;
 
 err:
+  VL53L1X_ClearInterrupt(dev_);
   VL53L1X_StopRanging(dev_);
   return success;
 }
