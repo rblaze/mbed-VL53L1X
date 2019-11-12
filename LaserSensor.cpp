@@ -20,6 +20,18 @@ LaserSensor::LaserSensor(mbed::I2C &bus, int address)
 
 LaserSensor::~LaserSensor() { VL53L1_UnregisterDevice(dev_); }
 
+bool LaserSensor::setTiming(uint16_t budgetMs, uint32_t periodMs) {
+  if (periodMs < budgetMs) {
+    return false;
+  }
+
+  if (VL53L1X_SetTimingBudgetInMs(dev_, budgetMs) != 0) {
+    return false;
+  }
+
+  return VL53L1X_SetInterMeasurementInMs(dev_, periodMs) == 0;
+}
+
 bool LaserSensor::measureOnce() {
   bool success = false;
 

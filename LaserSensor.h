@@ -56,9 +56,10 @@ public:
   // must be called after VL53L1X_SetDistanceMode.
   // Note:15 ms only works with Short distance mode. 100 ms is the default
   // value.
-  bool setTimingBudget(uint budgetMs) {
-    return VL53L1X_SetTimingBudgetInMs(dev_, budgetMs) == 0;
-  }
+  // The IMP must be greater than or equal to the TB otherwise the start of
+  // ranging is missed and theintermeaurement period is effectively doubled.
+
+  bool setTiming(uint16_t budgetMs, uint32_t periodMs);
 
   // Get range once. Returns true if result is ready, false for error.
   bool measureOnce();
