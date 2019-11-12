@@ -1,3 +1,5 @@
+// Copyright (c) 2019, Andrey Sverdlichenko - All Rights Reserved
+
 #include "LaserSensor.h"
 #include <mbed.h>
 

@@ -1,3 +1,5 @@
+// Copyright (c) 2019, Andrey Sverdlichenko - All Rights Reserved
+
 #pragma once
 
 #include "VL53L1X_api.h"
