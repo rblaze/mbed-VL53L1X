@@ -9,10 +9,38 @@ class LaserSensor {
 public:
   // Measurment status.
   enum class RangeStatus {
+    // When the range status is 0, there is no error.
     NO_ERROR = 0,
+    // Range status 1 and 2 are error warnings while range status 4
+    // and 7 are errors.
+    //
+    // When the range status is 1, there is a sigma failure. This means
+    // that the repeatability or standard deviation of themeasurement is
+    // bad due to a decreasing signal noise ratio. Increasing the timing
+    // budget can improve thestandard deviation and avoid a range status 1.
     SIGMA_FAILURE = 1,
+    // When the range status is 2, there is a signal failure. This means
+    // that the return signal is too week to return a good answer. The
+    // reason is because the target is too far, or the target is not
+    // reflective enough, or the target is toosmall. Increasing the timing
+    // buget might help, but there may simply be no target available.
     SIGNAL_FAILURE = 2,
+    // When the range status is 4, the sensor is "out of bounds". This
+    // means that the sensor is ranging in a "non-appropriated" zone and
+    // the measured result may be inconsistent. This status is considered
+    // as a warning but, in general, it happens when a target is at the
+    // maximum distance possible from the sensor, i.e. around 5 m. However,
+    // this is only for very bright targets.
     SENSOR_OUT_OF_BOUNDS = 4,
+    // Range status 7 is called "wraparound". This situation may occur
+    // when the target is very reflective and the distance to the target/sensor
+    // is longer than the physical limited distance measurable by the sensor.
+    // Such distances include approximately 5 m when the senor is in Long
+    // distance mode and approximately 1.3 m when the sensor is in Short
+    // distance mode. Example: a traffic sign located at 6 m can be seen by
+    // the sensor and returns a range of 1 m. This is due to "radar aliasing":
+    // if only an approximate distance is required, we may add 6 m to the
+    // distance returned. However, that is a very approximate estimation.
     WRAPAROUND = 7,
   };
 
