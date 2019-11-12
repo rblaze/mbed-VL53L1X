@@ -18,6 +18,8 @@ LaserSensor::LaserSensor(mbed::I2C &bus, int address)
   VL53L1X_SensorInit(dev_);
 }
 
+LaserSensor::~LaserSensor() { VL53L1_UnregisterDevice(dev_); }
+
 bool LaserSensor::measureOnce() {
   bool success = false;
 

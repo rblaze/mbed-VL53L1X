@@ -7,11 +7,6 @@
 
 class LaserSensor {
 public:
-  LaserSensor(mbed::I2C &bus, int address);
-
-  // Get range once. Returns true if result is ready, false for error.
-  bool measureOnce();
-
   // Measurment status.
   enum class RangeStatus {
     NO_ERROR = 0,
@@ -20,6 +15,12 @@ public:
     SENSOR_OUT_OF_BOUNDS = 4,
     WRAPAROUND = 7,
   };
+
+  LaserSensor(mbed::I2C &bus, int address);
+  ~LaserSensor();
+
+  // Get range once. Returns true if result is ready, false for error.
+  bool measureOnce();
 
   // Last scan status.
   RangeStatus getStatus() const;
@@ -32,6 +33,10 @@ public:
 
   // Default I2C address.
   static const int ADDR_DEFAULT = 0x52;
+
+  // Disable copying. It may be made working, but why bother.
+  LaserSensor(const LaserSensor &) = delete;
+  LaserSensor &operator=(const LaserSensor &) = delete;
 
 private:
   uint16_t dev_;
