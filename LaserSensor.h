@@ -47,6 +47,19 @@ public:
   LaserSensor(mbed::I2C &bus, int address);
   ~LaserSensor();
 
+  // Set scan mode.
+  bool setShortDistanceMode() { return VL53L1X_SetDistanceMode(dev_, 1) == 0; }
+
+  bool setLongDistanceMode() { return VL53L1X_SetDistanceMode(dev_, 2) == 0; }
+
+  // The TB values available are [15, 20,33, 50, 100, 200, 500]. This function
+  // must be called after VL53L1X_SetDistanceMode.
+  // Note:15 ms only works with Short distance mode. 100 ms is the default
+  // value.
+  bool setTimingBudget(uint budgetMs) {
+    return VL53L1X_SetTimingBudgetInMs(dev_, budgetMs) == 0;
+  }
+
   // Get range once. Returns true if result is ready, false for error.
   bool measureOnce();
 
