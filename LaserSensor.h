@@ -15,14 +15,14 @@ public:
     // and 7 are errors.
     //
     // When the range status is 1, there is a sigma failure. This means
-    // that the repeatability or standard deviation of themeasurement is
+    // that the repeatability or standard deviation of the measurement is
     // bad due to a decreasing signal noise ratio. Increasing the timing
-    // budget can improve thestandard deviation and avoid a range status 1.
+    // budget can improve the standard deviation and avoid a range status 1.
     SIGMA_FAILURE = 1,
     // When the range status is 2, there is a signal failure. This means
     // that the return signal is too week to return a good answer. The
     // reason is because the target is too far, or the target is not
-    // reflective enough, or the target is toosmall. Increasing the timing
+    // reflective enough, or the target is too small. Increasing the timing
     // buget might help, but there may simply be no target available.
     SIGNAL_FAILURE = 2,
     // When the range status is 4, the sensor is "out of bounds". This
