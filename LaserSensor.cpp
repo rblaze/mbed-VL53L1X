@@ -20,7 +20,7 @@ LaserSensor::LaserSensor(mbed::I2C &bus, int address)
 
 LaserSensor::~LaserSensor() { VL53L1_UnregisterDevice(dev_); }
 
-bool LaserSensor::setTiming(uint16_t budgetMs, uint32_t periodMs) {
+bool LaserSensor::setTimings(uint16_t budgetMs, uint32_t periodMs) {
   if (periodMs < budgetMs) {
     return false;
   }
@@ -32,6 +32,26 @@ bool LaserSensor::setTiming(uint16_t budgetMs, uint32_t periodMs) {
   return VL53L1X_SetInterMeasurementInMs(dev_, periodMs) == 0;
 }
 
+std::experimental::optional<uint16_t> LaserSensor::getBudget() {
+  uint16_t budget;
+
+  if (VL53L1X_GetTimingBudgetInMs(dev_, &budget) != 0) {
+    return std::experimental::nullopt;
+  }
+
+  return budget;
+}
+
+std::experimental::optional<uint16_t> LaserSensor::getPeriod() {
+  uint16_t period;
+
+  if (VL53L1X_GetInterMeasurementInMs(dev_, &period) != 0) {
+    return std::experimental::nullopt;
+  }
+
+  return period;
+}
+
 bool LaserSensor::measureOnce() {
   bool success = false;
 
@@ -39,7 +59,7 @@ bool LaserSensor::measureOnce() {
     return false;
   }
 
-  for (uint8_t dataReady = 0; dataReady != 0; /**/) {
+  for (uint8_t dataReady = 0; dataReady == 0; /**/) {
     if (VL53L1X_CheckForDataReady(dev_, &dataReady)) {
       goto err;
     }

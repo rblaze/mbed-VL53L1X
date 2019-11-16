@@ -4,6 +4,7 @@
 
 #include "VL53L1X_api.h"
 #include <I2C.h>
+#include <experimental/optional>
 
 class LaserSensor {
 public:
@@ -49,7 +50,6 @@ public:
 
   // Set scan mode.
   bool setShortDistanceMode() { return VL53L1X_SetDistanceMode(dev_, 1) == 0; }
-
   bool setLongDistanceMode() { return VL53L1X_SetDistanceMode(dev_, 2) == 0; }
 
   // The TB values available are [15, 20,33, 50, 100, 200, 500]. This function
@@ -59,7 +59,9 @@ public:
   // The IMP must be greater than or equal to the TB otherwise the start of
   // ranging is missed and theintermeaurement period is effectively doubled.
 
-  bool setTiming(uint16_t budgetMs, uint32_t periodMs);
+  bool setTimings(uint16_t budgetMs, uint32_t periodMs);
+  std::experimental::optional<uint16_t> getBudget();
+  std::experimental::optional<uint16_t> getPeriod();
 
   // Get range once. Returns true if result is ready, false for error.
   bool measureOnce();
