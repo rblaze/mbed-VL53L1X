@@ -39,46 +39,38 @@
 #include <string.h>
 #include <time.h>
 
-#include <experimental/optional>
-#include <vector>
-
 namespace {
 
-using std::experimental::optional;
+constexpr uint16_t kMaxDevices = MBED_CONF_VL53L1X_DRIVER_MAX_DEVICES;
 
 struct Device {
-  Device(mbed::I2C &_i2c, int _addr) : i2c(_i2c), addr(_addr) {}
-
-  mbed::I2C &i2c;
-  int addr;
+  mbed::I2C *i2c{nullptr};
+  int addr{0};
 };
 
-std::vector<optional<Device>> knownDevices;
+Device knownDevices[kMaxDevices];
 
 } // namespace
 
-uint16_t VL53L1_RegisterDevice(mbed::I2C &i2c, int address) {
-  for (uint16_t i = 0; i < knownDevices.size(); i++) {
-    auto &dev = knownDevices[i];
-    if (!dev) {
-      dev.emplace(i2c, address);
+uint16_t VL53L1_RegisterDevice(mbed::I2C *i2c, int address) {
+  for (uint16_t i = 0; i < kMaxDevices; i++) {
+    if (knownDevices[i].i2c == nullptr) {
+      knownDevices[i].i2c = i2c;
+      knownDevices[i].addr = address;
+
       return i;
     }
   }
 
-  // No free slots, add one.
-  // Do explicit resize, otherwise vector could allocate extra space.
-  uint16_t idx = knownDevices.size();
-  knownDevices.resize(idx + 1);
-  knownDevices[idx].emplace(i2c, address);
-
-  return idx;
+  return UINT16_MAX;
 }
 
 void VL53L1_UnregisterDevice(uint16_t dev) {
-  if (dev < knownDevices.size()) {
-    knownDevices[dev] = std::experimental::nullopt;
-  }
+  MBED_ASSERT(dev < kMaxDevices);
+  MBED_ASSERT(knownDevices[dev].i2c != nullptr);
+
+  knownDevices[dev].i2c = nullptr;
+  knownDevices[dev].addr = 0;
 }
 
 #if 0
@@ -89,72 +81,66 @@ int8_t VL53L1_WriteMulti( uint16_t dev, uint16_t index, uint8_t *pdata, uint32_t
 
 int8_t VL53L1_ReadMulti(uint16_t dev, uint16_t index, uint8_t *pdata,
                         uint32_t count) {
-  if (dev >= knownDevices.size() || !knownDevices[dev]) {
-    return VL53L1_UNKNOWN_DEVICE;
-  }
+  MBED_ASSERT(dev < kMaxDevices);
+  MBED_ASSERT(knownDevices[dev].i2c != nullptr);
 
   auto &device = knownDevices[dev];
   uint8_t buf[2] = {(uint8_t)(index >> 8), (uint8_t)index};
 
-  device->i2c.write(device->addr, (const char *)buf, sizeof(buf), true);
-  return device->i2c.read(device->addr, (char *)pdata, count);
+  device.i2c->write(device.addr, (const char *)buf, sizeof(buf), true);
+  return device.i2c->read(device.addr, (char *)pdata, count);
 }
 
 int8_t VL53L1_WrByte(uint16_t dev, uint16_t index, uint8_t data) {
-  if (dev >= knownDevices.size() || !knownDevices[dev]) {
-    return VL53L1_UNKNOWN_DEVICE;
-  }
+  MBED_ASSERT(dev < kMaxDevices);
+  MBED_ASSERT(knownDevices[dev].i2c != nullptr);
 
   auto &device = knownDevices[dev];
   uint8_t buf[3] = {(uint8_t)(index >> 8), (uint8_t)index, data};
-  return device->i2c.write(device->addr, (const char *)buf, sizeof(buf));
+  return device.i2c->write(device.addr, (const char *)buf, sizeof(buf));
 }
 
 int8_t VL53L1_WrWord(uint16_t dev, uint16_t index, uint16_t data) {
-  if (dev >= knownDevices.size() || !knownDevices[dev]) {
-    return VL53L1_UNKNOWN_DEVICE;
-  }
+  MBED_ASSERT(dev < kMaxDevices);
+  MBED_ASSERT(knownDevices[dev].i2c != nullptr);
 
   auto &device = knownDevices[dev];
   uint8_t buf[4] = {(uint8_t)(index >> 8), (uint8_t)index, (uint8_t)(data >> 8),
                     (uint8_t)data};
-  return device->i2c.write(device->addr, (const char *)buf, sizeof(buf));
+  return device.i2c->write(device.addr, (const char *)buf, sizeof(buf));
 }
 
 int8_t VL53L1_WrDWord(uint16_t dev, uint16_t index, uint32_t data) {
-  if (dev >= knownDevices.size() || !knownDevices[dev]) {
-    return VL53L1_UNKNOWN_DEVICE;
-  }
+  MBED_ASSERT(dev < kMaxDevices);
+  MBED_ASSERT(knownDevices[dev].i2c != nullptr);
 
   auto &device = knownDevices[dev];
   uint8_t buf[6] = {(uint8_t)(index >> 8), (uint8_t)index,
                     (uint8_t)(data >> 24), (uint8_t)(data >> 16),
                     (uint8_t)(data >> 8),  (uint8_t)data};
-  return device->i2c.write(device->addr, (const char *)buf, sizeof(buf));
+  return device.i2c->write(device.addr, (const char *)buf, sizeof(buf));
 }
 
 int8_t VL53L1_RdByte(uint16_t dev, uint16_t index, uint8_t *data) {
-  if (dev >= knownDevices.size() || !knownDevices[dev]) {
-    return VL53L1_UNKNOWN_DEVICE;
-  }
+  MBED_ASSERT(dev < kMaxDevices);
+  MBED_ASSERT(knownDevices[dev].i2c != nullptr);
 
   auto &device = knownDevices[dev];
   uint8_t buf[2] = {(uint8_t)(index >> 8), (uint8_t)index};
 
-  device->i2c.write(device->addr, (const char *)buf, sizeof(buf), true);
-  return device->i2c.read(device->addr, (char *)data, 1);
+  device.i2c->write(device.addr, (const char *)buf, sizeof(buf), true);
+  return device.i2c->read(device.addr, (char *)data, 1);
 }
 
 int8_t VL53L1_RdWord(uint16_t dev, uint16_t index, uint16_t *data) {
-  if (dev >= knownDevices.size() || !knownDevices[dev]) {
-    return VL53L1_UNKNOWN_DEVICE;
-  }
+  MBED_ASSERT(dev < kMaxDevices);
+  MBED_ASSERT(knownDevices[dev].i2c != nullptr);
 
   auto &device = knownDevices[dev];
   uint8_t buf[2] = {(uint8_t)(index >> 8), (uint8_t)index};
 
-  device->i2c.write(device->addr, (const char *)buf, sizeof(buf), true);
-  auto status = device->i2c.read(device->addr, (char *)buf, sizeof(buf));
+  device.i2c->write(device.addr, (const char *)buf, sizeof(buf), true);
+  auto status = device.i2c->read(device.addr, (char *)buf, sizeof(buf));
   if (status == 0) {
     *data = (buf[0] << 8) | buf[1];
   }
@@ -162,17 +148,16 @@ int8_t VL53L1_RdWord(uint16_t dev, uint16_t index, uint16_t *data) {
 }
 
 int8_t VL53L1_RdDWord(uint16_t dev, uint16_t index, uint32_t *data) {
-  if (dev >= knownDevices.size() || !knownDevices[dev]) {
-    return VL53L1_UNKNOWN_DEVICE;
-  }
+  MBED_ASSERT(dev < kMaxDevices);
+  MBED_ASSERT(knownDevices[dev].i2c != nullptr);
 
   auto &device = knownDevices[dev];
   uint8_t buf[2] = {(uint8_t)(index >> 8), (uint8_t)index};
 
-  device->i2c.write(device->addr, (const char *)buf, sizeof(buf), true);
+  device.i2c->write(device.addr, (const char *)buf, sizeof(buf), true);
 
   uint8_t rdbuf[4];
-  auto status = device->i2c.read(device->addr, (char *)rdbuf, sizeof(rdbuf));
+  auto status = device.i2c->read(device.addr, (char *)rdbuf, sizeof(rdbuf));
   if (status == 0) {
     *data = (rdbuf[0] << 24) | (rdbuf[1] << 16) | (rdbuf[2] << 8) | rdbuf[3];
   }

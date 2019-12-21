@@ -1,0 +1,6 @@
+{
+    "name": "vl53l1x-driver",
+    "config": {
+        "MAX_DEVICES": 1
+    }
+}

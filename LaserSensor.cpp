@@ -4,7 +4,7 @@
 #include <mbed.h>
 
 LaserSensor::LaserSensor(mbed::I2C &bus, int address)
-    : dev_{VL53L1_RegisterDevice(bus, address)} {
+    : dev_{VL53L1_RegisterDevice(&bus, address)} {
   // Wait for sensor to boot.
   for (uint8_t bootState = 0; bootState == 0; /**/) {
     VL53L1X_BootState(dev_, &bootState);

@@ -76,9 +76,8 @@ int8_t VL53L1_WaitMs(
 
 constexpr int8_t VL53L1_I2C_SUCCESS = 0;
 constexpr int8_t VL53L1_I2C_ERROR = -1;
-constexpr int8_t VL53L1_UNKNOWN_DEVICE = -2;
 
-uint16_t VL53L1_RegisterDevice(mbed::I2C& i2c, int address);
+uint16_t VL53L1_RegisterDevice(mbed::I2C* i2c, int address);
 void VL53L1_ChangeDeviceAddress(uint16_t dev, int new_address);
 void VL53L1_UnregisterDevice(uint16_t dev);
 
