@@ -10,7 +10,7 @@ LaserSensor::LaserSensor(mbed::I2C &bus, int address)
     VL53L1X_BootState(dev_, &bootState);
     if (bootState == 0) {
       // Wait for 1ms. Expected boot time is 1.2ms.
-      ThisThread::sleep_for(1);
+      ThisThread::sleep_for(1ms);
     }
   }
 
